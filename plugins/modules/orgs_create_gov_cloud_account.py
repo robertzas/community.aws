@@ -120,13 +120,18 @@ def create_gov_cloud_account(connection, module):
         "RoleName": module.params.get("role_name"),
         "IamUserAccessToBilling": module.params.get("iam_user_access_to_billing"),
         "Tags": module.params.get("tags"),
+        "CreateAccountRequestId": module.params.get("create_account_request_id"),
     }
     changed = False
 
     kwargs = dict((k, v) for k, v in params.items() if v is not None)
 
     try:
-        response = connection.create_gov_cloud_account(**kwargs)
+        response = (
+            connection.describe_create_account_status(**kwargs)
+            if "CreateAccountRequestId" in kwargs
+            else connection.create_gov_cloud_account(**kwargs)
+        )
         changed = True
     except Exception as e:
         module.fail_json_aws(e)
@@ -141,14 +146,18 @@ def create_gov_cloud_account(connection, module):
 
 def main():
     argument_spec = dict(
-        email=dict(required=True),
-        account_name=dict(required=True),
-        role_name=dict(required=False, default=None),
-        iam_user_access_to_billing=dict(required=False, default=None),
-        tags=dict(required=False, default=None),
+        email=dict(default=None),
+        account_name=dict(default=None),
+        role_name=dict(default=None),
+        iam_user_access_to_billing=dict(default=None),
+        tags=dict(default=None),
+        create_account_request_id=dict(default=None),
     )
 
-    module = AnsibleAWSModule(argument_spec=argument_spec)
+    module = AnsibleAWSModule(
+        argument_spec=argument_spec,
+        # supports_check_mode=True
+    )
 
     connection = module.client("organizations")
 
