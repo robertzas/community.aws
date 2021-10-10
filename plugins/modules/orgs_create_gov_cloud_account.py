@@ -127,12 +127,11 @@ def create_gov_cloud_account(connection, module):
     kwargs = dict((k, v) for k, v in params.items() if v is not None)
 
     try:
-        response = (
-            connection.describe_create_account_status(**kwargs)
-            if "CreateAccountRequestId" in kwargs
-            else connection.create_gov_cloud_account(**kwargs)
-        )
-        changed = True
+        if "CreateAccountRequestId" in kwargs:
+            response = connection.describe_create_account_status(**kwargs)
+        else:
+            response = connection.create_gov_cloud_account(**kwargs)
+            changed = True
     except Exception as e:
         module.fail_json_aws(e)
 
