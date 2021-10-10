@@ -136,7 +136,7 @@ def create_gov_cloud_account(connection, module):
     if create_account_status.get("state") == "FAILED":
         module.fail_json_aws(create_account_status)
 
-    module.exit_json(changed=changed, result=create_account_status)
+    module.exit_json(changed=changed, **create_account_status)
 
 
 def main():
